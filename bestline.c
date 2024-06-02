@@ -2867,10 +2867,10 @@ static void bestlineEditSuspend(void) {
     raise(SIGSTOP);
 }
 
-static void bestlineEditPause(struct bestlineState *l) {
-    tcflow(l->ofd, TCOOFF);
-    ispaused = 1;
-}
+/* static void bestlineEditPause(struct bestlineState *l) { */
+/*     tcflow(l->ofd, TCOOFF); */
+/*     ispaused = 1; */
+/* } */
 
 static void bestlineEditCtrlq(struct bestlineState *l) {
     if (ispaused) {
@@ -3099,7 +3099,7 @@ static ssize_t bestlineEdit(int stdin_fd, int stdout_fd, const char *prompt,
         Case(Ctrl('Q'), bestlineEditCtrlq(&l));
         Case(Ctrl('F'), bestlineEditRight(&l));
         Case(Ctrl('\\'), bestlineEditQuit());
-        Case(Ctrl('S'), bestlineEditPause(&l));
+        /* Case(Ctrl('S'), bestlineEditPause(&l)); */
         Case(Ctrl('?'), bestlineEditRubout(&l));
         Case(Ctrl('H'), bestlineEditRubout(&l));
         Case(Ctrl('L'), bestlineEditRefresh(&l));
