@@ -2951,14 +2951,14 @@ static void bestlineEditSuspend(void) {
 /*     ispaused = 1; */
 /* } */
 
-static void bestlineEditCtrlq(struct bestlineState *l) {
-    if (ispaused) {
-        bestlineUnpause(l->ofd);
-        bestlineRefreshLineForce(l);
-    } else {
-        bestlineEditInsertEscape(l);
-    }
-}
+/* static void bestlineEditCtrlq(struct bestlineState *l) { */
+/*     if (ispaused) { */
+/*         bestlineUnpause(l->ofd); */
+/*         bestlineRefreshLineForce(l); */
+/*     } else { */
+/*         bestlineEditInsertEscape(l); */
+/*     } */
+/* } */
 
 /**
  * Moves last item inside current s-expression to outside, e.g.
@@ -3192,7 +3192,7 @@ static ssize_t bestlineEdit(int stdin_fd, int stdout_fd, const char *prompt, con
             Case(Ctrl('B'), bestlineEditLeft(&l));
             Case(Ctrl('@'), bestlineEditMark(&l));
             Case(Ctrl('Y'), bestlineEditYank(&l));
-            Case(Ctrl('Q'), bestlineEditCtrlq(&l));
+            Case(Ctrl('V'), bestlineEditInsertEscape(&l));
             Case(Ctrl('F'), bestlineEditRight(&l));
             Case(Ctrl('\\'), bestlineEditQuit());
             /* Case(Ctrl('S'), bestlineEditPause(&l)); */
