@@ -2068,6 +2068,25 @@ static void bestlineEditHistoryMove(struct bestlineState *l, int dx) {
     bestlineEditHistoryGoto(l,l->hindex+dx);
 }
 
+static void bestlineEditHistoryMovePrefix(struct bestlineState *l, int dx) {
+    char *buf;
+    size_t buflen;
+    if (l->hindex == 0) {
+        buf = l->buf;
+        buflen = l->len;
+    } else {
+        buf = history[historylen - 1];
+        buflen = strlen(buf);
+    }
+    for (int i = l->hindex + dx; i >= 0 && i < historylen; i += dx) {
+        if (i == 0 || (strncmp(buf, history[historylen - 1 - i], buflen) == 0
+                    && history[historylen - 1 - i][buflen] != '\0')) {
+            bestlineEditHistoryGoto(l,i);
+            return;
+        }
+    }
+}
+
 static char *bestlineMakeSearchPrompt(struct abuf *ab, int fail, const char *s, int n) {
     ab->len=0;
     abAppendw(ab,'(');
@@ -2502,6 +2521,14 @@ static void bestlineEditBof(struct bestlineState *l) {
 
 static void bestlineEditEof(struct bestlineState *l) {
     bestlineEditHistoryGoto(l,0);
+}
+
+static void bestlineEditUpPrefix(struct bestlineState *l) {
+    bestlineEditHistoryMovePrefix(l,BESTLINE_HISTORY_PREV);
+}
+
+static void bestlineEditDownPrefix(struct bestlineState *l) {
+    bestlineEditHistoryMovePrefix(l,BESTLINE_HISTORY_NEXT);
 }
 
 static void bestlineEditRefresh(struct bestlineState *l) {
@@ -3183,8 +3210,8 @@ static ssize_t bestlineEdit(int stdin_fd, int stdout_fd, const char *prompt,
                     }
                 } else {
                     switch (seq[2]) {
-                    Case('A', bestlineEditUp(&l));
-                    Case('B', bestlineEditDown(&l));
+                    Case('A', bestlineEditUpPrefix(&l));
+                    Case('B', bestlineEditDownPrefix(&l));
                     Case('C', bestlineEditRight(&l));
                     Case('D', bestlineEditLeft(&l));
                     Case('H', bestlineEditHome(&l));
@@ -3197,8 +3224,8 @@ static ssize_t bestlineEdit(int stdin_fd, int stdout_fd, const char *prompt,
             case 'O':
                 if (nread < 3) break;
                 switch (seq[2]) {
-                Case('A', bestlineEditUp(&l));
-                Case('B', bestlineEditDown(&l));
+                Case('A', bestlineEditUpPrefix(&l));
+                Case('B', bestlineEditDownPrefix(&l));
                 Case('C', bestlineEditRight(&l));
                 Case('D', bestlineEditLeft(&l));
                 Case('H', bestlineEditHome(&l));
