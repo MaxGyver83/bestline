@@ -2818,6 +2818,36 @@ static void bestlineEditRotate(struct bestlineState *l) {
     }
 }
 
+static char *bestlineFindLastArg(char *line) {
+    char *arg = NULL;
+    int quoted = 0;
+    for (char *p = line; *p; p++) {
+        if (*p == '\'')
+            quoted = !quoted;
+        else if (*p == ' ' && !quoted)
+            arg = p + 1;
+    }
+    return arg ? arg : line;
+}
+
+static void bestlineEditYankLastArg(struct bestlineState *l) {
+    static size_t buflen = 0;
+    static unsigned hindexarg = 0;
+    int altdotrepeated = l->seq[1][0] == 033 && l->seq[1][1] == '.';
+    if (!altdotrepeated) {
+        hindexarg = 0;
+        buflen = l->len;
+    }
+    if (hindexarg >= historylen - 1) return;
+    hindexarg++;
+    char *arg = bestlineFindLastArg(history[historylen - 1 - hindexarg]);
+    if (!bestlineGrow(l, buflen + strlen(arg) + 1)) return;
+    memcpy(l->buf + buflen, arg, strlen(arg));
+    l->buf[buflen + strlen(arg)] = 0;
+    l->len = l->pos = buflen + strlen(arg);
+    bestlineRefreshLine(l);
+}
+
 static void bestlineEditTranspose(struct bestlineState *l) {
     char *q, *p;
     size_t a, b, c;
@@ -3308,6 +3338,7 @@ static ssize_t bestlineEdit(int stdin_fd, int stdout_fd, const char *prompt, con
                 Case('f', bestlineEditRightWord(&l));
                 Case('h', bestlineEditRuboutWord(&l));
                 Case('d', bestlineEditDeleteWord(&l));
+                Case('.', bestlineEditYankLastArg(&l));
                 Case('l', bestlineEditLowercaseWord(&l));
                 Case('u', bestlineEditUppercaseWord(&l));
                 Case('c', bestlineEditCapitalizeWord(&l));
