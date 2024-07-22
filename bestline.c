@@ -3192,6 +3192,14 @@ static ssize_t bestlineEdit(int stdin_fd, int stdout_fd, const char *prompt,
                 return -1;
             }
             break;
+        case Ctrl('Q'):
+            if (l.len == 0) {
+                free(history[--historylen]);
+                history[historylen] = 0;
+                free(l.buf);
+                return -1;
+            }
+            break;
         case '\r':
             if (!balancemode || IsBalanced(&l)) {
                 l.final = 1;
